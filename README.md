@@ -1,0 +1,1 @@
+A tool that is used to check Topgrade's i18n locale file.
