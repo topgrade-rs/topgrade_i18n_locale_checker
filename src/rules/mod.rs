@@ -1,3 +1,4 @@
+pub(crate) mod key_and_en_matches;
 pub(crate) mod missing_translations;
 
 use crate::LocalizedTexts;
@@ -5,8 +6,7 @@ use once_cell::sync::Lazy;
 use std::collections::{hash_map::Entry, HashMap};
 
 /// This is where errors found by [`Rule`]s are stored.
-pub(crate) static mut ERROR_STORAGE: Lazy<HashMap<String, Vec<(String, String)>>> =
-    Lazy::new(|| HashMap::new());
+pub(crate) static mut ERROR_STORAGE: Lazy<HashMap<String, Vec<String>>> = Lazy::new(HashMap::new);
 
 /// Represents a rule that Topgrade's locale file should obey.
 ///
@@ -27,7 +27,7 @@ pub(crate) trait Rule {
     }
 
     /// Implementations should invoke this when found an error.
-    fn report_error(key: String, error_msg: String)
+    fn report_error(key: String)
     where
         Self: Sized, // remove it from the vtable
     {
@@ -36,10 +36,10 @@ pub(crate) trait Rule {
         unsafe {
             match ERROR_STORAGE.entry(Self::name().to_string()) {
                 Entry::Occupied(mut o) => {
-                    o.get_mut().push((key, error_msg));
+                    o.get_mut().push(key);
                 }
                 Entry::Vacant(v) => {
-                    v.insert(vec![(key, error_msg)]);
+                    v.insert(vec![key]);
                 }
             }
         }

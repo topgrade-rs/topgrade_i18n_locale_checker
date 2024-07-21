@@ -45,8 +45,8 @@ impl Checker {
             } else {
                 for (rule, errors) in ERROR_STORAGE.iter() {
                     println!("  {}", rule);
-                    for (key, error) in errors {
-                        println!("    {}: {}", key, error);
+                    for key in errors {
+                        println!("    {}", key);
                     }
                 }
             }

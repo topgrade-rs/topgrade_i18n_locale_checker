@@ -4,6 +4,7 @@ mod rules;
 
 use crate::checker::Checker;
 use crate::parse::LocalizedTexts;
+use crate::rules::key_and_en_matches::KeyEnMatches;
 use crate::rules::missing_translations::MissingTranslations;
 use serde_yaml_ng::from_reader;
 use serde_yaml_ng::Value as Yaml;
@@ -12,8 +13,7 @@ use std::fs::File;
 
 fn main() {
     let file_name = args()
-        .skip(1)
-        .next()
+        .nth(1)
         .expect("Error: a yaml file should be specified");
     let file = File::open(&file_name).unwrap_or_else(|e| {
         panic!(
@@ -28,6 +28,7 @@ fn main() {
 
     let mut checker = Checker::new();
     checker.register_rule(MissingTranslations);
+    checker.register_rule(KeyEnMatches);
 
     checker.check(&localized_texts);
 
