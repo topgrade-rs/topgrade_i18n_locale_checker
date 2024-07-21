@@ -26,11 +26,9 @@ impl Rule for KeyEnMatches {
     }
 }
 
-const LEFT_BRACE: &str = "{";
-const RIGHT_BRACE: &str = "}";
-
 mod parser {
-    use super::{LEFT_BRACE, RIGHT_BRACE};
+    const LEFT_BRACE: &str = "{";
+    const RIGHT_BRACE: &str = "}";
 
     /// A locale token in the key.
     #[derive(Debug, PartialEq, Eq)]

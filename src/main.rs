@@ -13,8 +13,7 @@ use std::fs::File;
 
 fn main() {
     let file_name = args()
-        .skip(1)
-        .next()
+        .nth(1)
         .expect("Error: a yaml file should be specified");
     let file = File::open(&file_name).unwrap_or_else(|e| {
         panic!(

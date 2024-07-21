@@ -6,8 +6,7 @@ use once_cell::sync::Lazy;
 use std::collections::{hash_map::Entry, HashMap};
 
 /// This is where errors found by [`Rule`]s are stored.
-pub(crate) static mut ERROR_STORAGE: Lazy<HashMap<String, Vec<String>>> =
-    Lazy::new(|| HashMap::new());
+pub(crate) static mut ERROR_STORAGE: Lazy<HashMap<String, Vec<String>>> = Lazy::new(HashMap::new);
 
 /// Represents a rule that Topgrade's locale file should obey.
 ///
