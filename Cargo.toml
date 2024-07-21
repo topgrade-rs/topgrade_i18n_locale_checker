@@ -1,0 +1,9 @@
+[package]
+name = "topgrade_i18n_locale_file_checker"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+indexmap = "2.2.6"
+once_cell = "1.19.0"
+serde_yaml_ng = "0.10.0"
