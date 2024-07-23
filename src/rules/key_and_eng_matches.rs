@@ -4,23 +4,28 @@ use super::Rule;
 
 /// A rules that enforces a locale's key matches its English translation.
 ///
-/// This is requested by rust-i18n (The i18n framework Topgrade uses), it is simply
-/// our convention.
-pub(crate) struct KeyEnMatches;
+/// This is not requested by rust-i18n (The i18n framework Topgrade uses), it is
+/// simply our convention.
+pub(crate) struct KeyEngMatches;
 
-impl Rule for KeyEnMatches {
+impl Rule for KeyEngMatches {
     fn check(&self, localized_texts: &crate::parse::LocalizedTexts) {
         for (key, translations) in localized_texts.texts.iter() {
-            let en = translations
-                .en
-                .as_ref()
-                .expect("expect translation en to be provided");
+            let en = &translations.en;
+
+            if en.is_none() {
+                Self::report_error(key.clone(), Some("Missing English translation".into()));
+                return;
+            }
+
             let mut parser = LocaleKeyParser::new();
             parser.parse(key);
             let expected = key_to_en(&parser);
 
+            let en = en.as_ref().unwrap();
+
             if en != &expected {
-                Self::report_error(key.clone())
+                Self::report_error(key.clone(), None)
             }
         }
     }

@@ -45,8 +45,12 @@ impl Checker {
             } else {
                 for (rule, errors) in ERROR_STORAGE.iter() {
                     println!("  {}", rule);
-                    for key in errors {
-                        println!("    {}", key);
+                    for (key, opt_error_msg) in errors {
+                        print!("    {}", key);
+                        match opt_error_msg {
+                            Some(error_msg) => println!(": {}", error_msg),
+                            None => println!(),
+                        }
                     }
                 }
             }
