@@ -4,8 +4,8 @@ use super::Rule;
 
 /// A rules that enforces a locale's key matches its English translation.
 ///
-/// This is requested by rust-i18n (The i18n framework Topgrade uses), it is simply
-/// our convention.
+/// This is not requested by rust-i18n (The i18n framework Topgrade uses), it is
+/// simply our convention.
 pub(crate) struct KeyEngMatches;
 
 impl Rule for KeyEngMatches {
