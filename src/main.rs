@@ -4,7 +4,7 @@ mod rules;
 
 use crate::checker::Checker;
 use crate::parse::LocalizedTexts;
-use crate::rules::key_and_en_matches::KeyEngMatches;
+use crate::rules::key_and_eng_matches::KeyEngMatches;
 use crate::rules::missing_translations::MissingTranslations;
 use serde_yaml_ng::from_reader;
 use serde_yaml_ng::Value as Yaml;
