@@ -11,6 +11,8 @@ use serde_yaml_ng::Value as Yaml;
 use std::env::args;
 use std::fs::File;
 
+const EXIT_CODE_ON_ERROR: i32 = 1;
+
 fn main() {
     let file_name = args()
         .nth(1)
@@ -33,4 +35,8 @@ fn main() {
     checker.check(&localized_texts);
 
     checker.report_to_user();
+
+    if checker.has_error() {
+        std::process::exit(EXIT_CODE_ON_ERROR);
+    }
 }
