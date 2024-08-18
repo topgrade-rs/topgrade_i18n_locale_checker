@@ -28,21 +28,30 @@ impl Checker {
         }
     }
 
+    /// Return true if there is no error.
+    pub(crate) fn has_error(&self) -> bool {
+        // SAFETY:
+        // It is safe to directly modify the global static variable as there is only 1 thread.
+        let n_errors: usize = unsafe {
+            ERROR_STORAGE
+                .iter()
+                .map(|(_key, errors)| errors.len())
+                .sum()
+        };
+
+        n_errors != 0
+    }
+
     /// Print the errors that are found in a human-readable way.
     pub(crate) fn report_to_user(&self) {
-        println!("Errors Found:");
-
         // SAFETY:
         // It is safe to directly modify the global static variable as there is only 1 thread.
         unsafe {
-            let n_errors: usize = ERROR_STORAGE
-                .iter()
-                .map(|(_key, errors)| errors.len())
-                .sum();
-
-            if n_errors == 0 {
-                println!("  No error");
+            if !self.has_error() {
+                println!("No error found!");
             } else {
+                println!("Errors Found:");
+
                 for (rule, errors) in ERROR_STORAGE.iter() {
                     println!("  {}", rule);
                     for (key, opt_error_msg) in errors {
