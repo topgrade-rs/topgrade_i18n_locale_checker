@@ -101,13 +101,13 @@ mod tests {
         let root_tempdir_path = root_tempdir.path();
 
         let file_foo = root_tempdir_path.join("foo");
-        std::fs::File::create_new(&file_foo).unwrap();
+        std::fs::File::create(&file_foo).unwrap();
         let file_bar_rs = root_tempdir_path.join("bar.rs");
-        std::fs::File::create_new(&file_bar_rs).unwrap();
+        std::fs::File::create(&file_bar_rs).unwrap();
         let dir_baz = root_tempdir_path.join("baz");
         std::fs::create_dir(&dir_baz).unwrap();
         let file_qux_rs_under_dir_baz = dir_baz.join("qux.rs");
-        std::fs::File::create_new(&file_qux_rs_under_dir_baz).unwrap();
+        std::fs::File::create(&file_qux_rs_under_dir_baz).unwrap();
 
         let cli = Cli {
             // This field won't be used so let's give it a NULL value
@@ -122,7 +122,7 @@ mod tests {
         );
 
         let file_quux_rs_under_dir_baz = dir_baz.join("quux");
-        std::fs::File::create_new(&file_quux_rs_under_dir_baz).unwrap();
+        std::fs::File::create(&file_quux_rs_under_dir_baz).unwrap();
 
         let flattened = cli.rust_src_to_check();
         assert_eq!(
