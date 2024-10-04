@@ -34,11 +34,14 @@ impl Checker {
         }
     }
 
+    /// Returns the number of errors stored in `self.errors`.
+    fn n_errors(&self) -> usize {
+        self.errors.values().map(|errors| errors.len()).sum()
+    }
+
     /// Return true if there is no error.
     pub(crate) fn has_error(&self) -> bool {
-        let n_errors: usize = self.errors.values().map(|errors| errors.len()).sum();
-
-        n_errors != 0
+        self.n_errors() != 0
     }
 
     /// Print the errors that are found in a human-readable way.
@@ -59,5 +62,31 @@ impl Checker {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_n_errors_and_has_error() {
+        let mut checker = Checker::new();
+        assert_eq!(checker.n_errors(), 0);
+        assert!(!checker.has_error());
+        checker.errors.insert("rule_name".to_string(), Vec::new());
+        assert_eq!(checker.n_errors(), 0);
+        assert!(!checker.has_error());
+
+        checker
+            .errors
+            .insert("rule_name2".into(), vec![("locale_key".into(), None)]);
+        assert_eq!(checker.n_errors(), 1);
+        assert!(checker.has_error());
+
+        let errors_of_rule_name = checker.errors.get_mut("rule_name").unwrap();
+        errors_of_rule_name.push(("locale_key".into(), None));
+        assert_eq!(checker.n_errors(), 2);
+        assert!(checker.has_error());
     }
 }
