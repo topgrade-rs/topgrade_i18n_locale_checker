@@ -35,7 +35,7 @@ impl Cli {
         let mut rust_files_to_check = Vec::with_capacity(self.rust_src_to_check.len());
 
         for entry_path in self.rust_src_to_check.iter() {
-            let entry_metadata = std::fs::symlink_metadata(&entry_path).unwrap_or_else(|e| {
+            let entry_metadata = std::fs::symlink_metadata(entry_path).unwrap_or_else(|e| {
                 panic!(
                     "Error: cannot get the metadata of the specified file {} due to error {:?}",
                     entry_path.display(),
@@ -66,10 +66,8 @@ impl Cli {
                         )
                     });
 
-                    if entry_metadata.is_file() {
-                        if is_rust_file(entry_path) {
-                            rust_files_to_check.push(Cow::Owned(entry_path.to_path_buf()));
-                        }
+                    if entry_metadata.is_file() && is_rust_file(entry_path) {
+                        rust_files_to_check.push(Cow::Owned(entry_path.to_path_buf()));
                     }
                 }
             }
