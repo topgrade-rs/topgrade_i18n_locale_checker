@@ -293,7 +293,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "topgrade_i18n_locale_file_checker"
+name = "topgrade_i18n_locale_checker"
 version = "0.1.0"
 dependencies = [
  "bitflags",
