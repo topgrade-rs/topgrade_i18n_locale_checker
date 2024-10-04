@@ -40,6 +40,7 @@ impl Translations {
 /// Represents all the localized texts used by Topgrade.
 #[derive(Debug)]
 pub(crate) struct LocalizedTexts {
+    /// Locale key => All the translations.
     pub(crate) texts: IndexMap<String, Translations>,
 }
 

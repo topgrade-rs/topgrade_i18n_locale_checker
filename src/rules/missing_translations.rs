@@ -31,7 +31,11 @@ impl MissingLanguages {
 pub(crate) struct MissingTranslations;
 
 impl Rule for MissingTranslations {
-    fn check(&self, localized_texts: &crate::LocalizedTexts) {
+    fn check(
+        &self,
+        localized_texts: &crate::LocalizedTexts,
+        _locale_keys: &[crate::locale_key_collector::LocaleKey],
+    ) {
         for (key, translations) in localized_texts.texts.iter() {
             let mut missing_langs = MissingLanguages::empty();
 

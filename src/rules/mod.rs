@@ -1,5 +1,6 @@
 pub(crate) mod key_and_eng_matches;
 pub(crate) mod missing_translations;
+pub(crate) mod use_of_keys_do_not_exist;
 
 use crate::LocalizedTexts;
 use once_cell::sync::Lazy;
@@ -20,13 +21,13 @@ pub(crate) trait Rule {
     /// Name of this rule.
     fn name() -> &'static str
     where
-        Self: Sized, // remove it from the vtable
+        Self: Sized, // remove it from the vtable to make `trait Rule` object safe.
     {
         let full_name = std::any::type_name::<Self>();
         let maybe_start_idx = full_name.rfind(':');
         match maybe_start_idx {
             Some(start_idx) => &full_name[start_idx + 1..],
-            None => "UNKNOWN",
+            None => "Unknown rule name",
         }
     }
 
@@ -35,7 +36,7 @@ pub(crate) trait Rule {
     /// When `error_msg` is `Some`, it will be stored and reported to users as well.
     fn report_error(key: String, error_msg: Option<String>)
     where
-        Self: Sized, // remove it from the vtable
+        Self: Sized, // remove it from the vtable to make `trait Rule` object safe.
     {
         // SAFETY:
         // It is safe to directly modify the global static variable as there is only 1 thread.
@@ -52,5 +53,9 @@ pub(crate) trait Rule {
     }
 
     /// Begin the check.
-    fn check(&self, localized_texts: &LocalizedTexts);
+    fn check(
+        &self,
+        localized_texts: &LocalizedTexts,
+        locale_keys: &[crate::locale_key_collector::LocaleKey],
+    );
 }
