@@ -1,5 +1,6 @@
 use super::Rule;
 use bitflags::bitflags;
+use std::collections::HashMap;
 
 bitflags! {
     /// A bitflag represent the missing languages, every language would take 1 bit.
@@ -35,6 +36,7 @@ impl Rule for MissingTranslations {
         &self,
         localized_texts: &crate::LocalizedTexts,
         _locale_keys: &[crate::locale_key_collector::LocaleKey],
+        erros: &mut HashMap<String, Vec<(String, Option<String>)>>,
     ) {
         for (key, translations) in localized_texts.texts.iter() {
             let mut missing_langs = MissingLanguages::empty();
@@ -44,7 +46,7 @@ impl Rule for MissingTranslations {
             }
 
             if !missing_langs.is_empty() {
-                Self::report_error(key.clone(), Some(missing_langs.error_msg()));
+                Self::report_error(key.clone(), Some(missing_langs.error_msg()), erros);
             }
         }
     }
