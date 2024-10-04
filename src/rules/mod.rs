@@ -1,5 +1,6 @@
 pub(crate) mod key_and_eng_matches;
 pub(crate) mod missing_translations;
+pub(crate) mod use_of_keys_do_not_exist;
 
 use crate::LocalizedTexts;
 use once_cell::sync::Lazy;
@@ -52,5 +53,9 @@ pub(crate) trait Rule {
     }
 
     /// Begin the check.
-    fn check(&self, localized_texts: &LocalizedTexts);
+    fn check(
+        &self,
+        localized_texts: &LocalizedTexts,
+        locale_keys: &[crate::locale_key_collector::LocaleKey],
+    );
 }

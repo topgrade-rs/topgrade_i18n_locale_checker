@@ -9,7 +9,11 @@ use super::Rule;
 pub(crate) struct KeyEngMatches;
 
 impl Rule for KeyEngMatches {
-    fn check(&self, localized_texts: &crate::parse::LocalizedTexts) {
+    fn check(
+        &self,
+        localized_texts: &crate::locale_file_parser::LocalizedTexts,
+        _locale_keys: &[crate::locale_key_collector::LocaleKey],
+    ) {
         for (key, translations) in localized_texts.texts.iter() {
             let en = &translations.en;
 

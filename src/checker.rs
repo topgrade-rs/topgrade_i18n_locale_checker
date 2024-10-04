@@ -1,6 +1,7 @@
 //! This file contains the checker type.
 
-use crate::parse::LocalizedTexts;
+use crate::locale_file_parser::LocalizedTexts;
+use crate::locale_key_collector::LocaleKey;
 use crate::rules::Rule;
 use crate::rules::ERROR_STORAGE;
 
@@ -22,9 +23,9 @@ impl Checker {
     }
 
     /// Run the check process.
-    pub(crate) fn check(&self, localized_texts: &LocalizedTexts) {
+    pub(crate) fn check(&self, localized_texts: &LocalizedTexts, locale_keys: &[LocaleKey]) {
         for rule in self.rules.iter() {
-            rule.check(localized_texts)
+            rule.check(localized_texts, locale_keys)
         }
     }
 
