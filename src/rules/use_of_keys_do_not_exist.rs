@@ -35,6 +35,7 @@ impl Rule for UseOfKeysDoNotExist {
 
 #[cfg(test)]
 mod tests {
+    use crate::locale_file_parser::Translations;
     use indexmap::IndexMap;
     use std::path::Path;
 
