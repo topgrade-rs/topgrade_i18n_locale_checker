@@ -1,6 +1,7 @@
 use parser::{LocaleKeyParser, LocaleToken};
 
 use super::Rule;
+use std::collections::HashMap;
 
 /// A rules that enforces a locale's key matches its English translation.
 ///
@@ -13,12 +14,17 @@ impl Rule for KeyEngMatches {
         &self,
         localized_texts: &crate::locale_file_parser::LocalizedTexts,
         _locale_keys: &[crate::locale_key_collector::LocaleKey],
+        erros: &mut HashMap<String, Vec<(String, Option<String>)>>,
     ) {
         for (key, translations) in localized_texts.texts.iter() {
             let en = &translations.en;
 
             if en.is_none() {
-                Self::report_error(key.clone(), Some("Missing English translation".into()));
+                Self::report_error(
+                    key.clone(),
+                    Some("Missing English translation".into()),
+                    erros,
+                );
                 return;
             }
 
@@ -29,7 +35,7 @@ impl Rule for KeyEngMatches {
             let en = en.as_ref().unwrap();
 
             if en != &expected {
-                Self::report_error(key.clone(), None)
+                Self::report_error(key.clone(), None, erros)
             }
         }
     }

@@ -3,18 +3,23 @@
 use crate::locale_file_parser::LocalizedTexts;
 use crate::locale_key_collector::LocaleKey;
 use crate::rules::Rule;
-use crate::rules::ERROR_STORAGE;
+use std::collections::HashMap;
 
 /// This type and its methods are the code where we check the locale file.
 pub(crate) struct Checker {
-    /// The registered (will be applied) rule.
+    /// The registered (will be applied) rule
     rules: Vec<Box<dyn Rule>>,
+    /// `HashMap<RuleName, Vec<(Key, OptionalErrorMessage)>>`
+    errors: HashMap<String, Vec<(String, Option<String>)>>,
 }
 
 impl Checker {
     /// Creates a new checker with 0 rule registered.
     pub(crate) fn new() -> Self {
-        Self { rules: Vec::new() }
+        Self {
+            rules: Vec::new(),
+            errors: HashMap::new(),
+        }
     }
 
     /// Register a rule.
@@ -23,44 +28,33 @@ impl Checker {
     }
 
     /// Run the check process.
-    pub(crate) fn check(&self, localized_texts: &LocalizedTexts, locale_keys: &[LocaleKey]) {
+    pub(crate) fn check(&mut self, localized_texts: &LocalizedTexts, locale_keys: &[LocaleKey]) {
         for rule in self.rules.iter() {
-            rule.check(localized_texts, locale_keys)
+            rule.check(localized_texts, locale_keys, &mut self.errors)
         }
     }
 
     /// Return true if there is no error.
     pub(crate) fn has_error(&self) -> bool {
-        // SAFETY:
-        // It is safe to directly modify the global static variable as there is only 1 thread.
-        let n_errors: usize = unsafe {
-            ERROR_STORAGE
-                .iter()
-                .map(|(_key, errors)| errors.len())
-                .sum()
-        };
+        let n_errors: usize = self.errors.values().map(|errors| errors.len()).sum();
 
         n_errors != 0
     }
 
     /// Print the errors that are found in a human-readable way.
     pub(crate) fn report_to_user(&self) {
-        // SAFETY:
-        // It is safe to directly modify the global static variable as there is only 1 thread.
-        unsafe {
-            if !self.has_error() {
-                println!("No error found!");
-            } else {
-                println!("Errors Found:");
+        if !self.has_error() {
+            println!("No error found!");
+        } else {
+            println!("Errors Found:");
 
-                for (rule, errors) in ERROR_STORAGE.iter() {
-                    println!("  {}", rule);
-                    for (key, opt_error_msg) in errors {
-                        print!("    {}", key);
-                        match opt_error_msg {
-                            Some(error_msg) => println!(": {}", error_msg),
-                            None => println!(),
-                        }
+            for (rule, errors) in self.errors.iter() {
+                println!("  {}", rule);
+                for (key, opt_error_msg) in errors {
+                    print!("    {}", key);
+                    match opt_error_msg {
+                        Some(error_msg) => println!(": {}", error_msg),
+                        None => println!(),
                     }
                 }
             }

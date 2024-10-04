@@ -1,6 +1,7 @@
 //! A rule that checks if Topgrade uses any locale keys that do not exist.
 
 use super::Rule;
+use std::collections::HashMap;
 
 /// Checks if Topgrade uses any locale keys that do not exist.
 pub(crate) struct UseOfKeysDoNotExist;
@@ -10,6 +11,7 @@ impl Rule for UseOfKeysDoNotExist {
         &self,
         localized_texts: &crate::locale_file_parser::LocalizedTexts,
         locale_keys: &[crate::locale_key_collector::LocaleKey],
+        erros: &mut HashMap<String, Vec<(String, Option<String>)>>,
     ) {
         for locale_key in locale_keys {
             if !localized_texts.texts.contains_key(&locale_key.key) {
@@ -22,6 +24,7 @@ impl Rule for UseOfKeysDoNotExist {
                         locale_key.key
                     ),
                     None,
+                    erros,
                 );
             }
         }

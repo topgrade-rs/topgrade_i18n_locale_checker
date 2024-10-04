@@ -3,15 +3,7 @@ pub(crate) mod missing_translations;
 pub(crate) mod use_of_keys_do_not_exist;
 
 use crate::LocalizedTexts;
-use once_cell::sync::Lazy;
 use std::collections::{hash_map::Entry, HashMap};
-
-/// This is where errors found by [`Rule`]s are stored.
-///
-/// `HashMap<RuleName, Vec<(Key, OptionalErrorMessage)>>`
-#[allow(clippy::type_complexity)] // just ignore it
-pub(crate) static mut ERROR_STORAGE: Lazy<HashMap<String, Vec<(String, Option<String>)>>> =
-    Lazy::new(HashMap::new);
 
 /// Represents a rule that Topgrade's locale file should obey.
 ///
@@ -34,20 +26,19 @@ pub(crate) trait Rule {
     /// Implementations should invoke this when found an error.
     ///
     /// When `error_msg` is `Some`, it will be stored and reported to users as well.
-    fn report_error(key: String, error_msg: Option<String>)
-    where
+    fn report_error(
+        key: String,
+        error_msg: Option<String>,
+        errors: &mut HashMap<String, Vec<(String, Option<String>)>>,
+    ) where
         Self: Sized, // remove it from the vtable to make `trait Rule` object safe.
     {
-        // SAFETY:
-        // It is safe to directly modify the global static variable as there is only 1 thread.
-        unsafe {
-            match ERROR_STORAGE.entry(Self::name().to_string()) {
-                Entry::Occupied(mut o) => {
-                    o.get_mut().push((key, error_msg));
-                }
-                Entry::Vacant(v) => {
-                    v.insert(vec![(key, error_msg)]);
-                }
+        match errors.entry(Self::name().to_string()) {
+            Entry::Occupied(mut o) => {
+                o.get_mut().push((key, error_msg));
+            }
+            Entry::Vacant(v) => {
+                v.insert(vec![(key, error_msg)]);
             }
         }
     }
@@ -57,5 +48,6 @@ pub(crate) trait Rule {
         &self,
         localized_texts: &LocalizedTexts,
         locale_keys: &[crate::locale_key_collector::LocaleKey],
+        erros: &mut HashMap<String, Vec<(String, Option<String>)>>,
     );
 }
