@@ -21,13 +21,13 @@ pub(crate) trait Rule {
     /// Name of this rule.
     fn name() -> &'static str
     where
-        Self: Sized, // remove it from the vtable
+        Self: Sized, // remove it from the vtable to make `trait Rule` object safe.
     {
         let full_name = std::any::type_name::<Self>();
         let maybe_start_idx = full_name.rfind(':');
         match maybe_start_idx {
             Some(start_idx) => &full_name[start_idx + 1..],
-            None => "UNKNOWN",
+            None => "Unknown rule name",
         }
     }
 
@@ -36,7 +36,7 @@ pub(crate) trait Rule {
     /// When `error_msg` is `Some`, it will be stored and reported to users as well.
     fn report_error(key: String, error_msg: Option<String>)
     where
-        Self: Sized, // remove it from the vtable
+        Self: Sized, // remove it from the vtable to make `trait Rule` object safe.
     {
         // SAFETY:
         // It is safe to directly modify the global static variable as there is only 1 thread.
