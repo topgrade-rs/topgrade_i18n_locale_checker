@@ -8,7 +8,7 @@ use serde_yaml_ng::Value as Yaml;
 const LOCALE_FILE_VERSION: i64 = 2;
 
 /// Translations of various languages.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct Translations {
     /// English
     pub(crate) en: Option<String>,
@@ -38,7 +38,7 @@ impl Translations {
 }
 
 /// Represents all the localized texts used by Topgrade.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct LocalizedTexts {
     /// Locale key => All the translations.
     pub(crate) texts: IndexMap<String, Translations>,
@@ -74,5 +74,70 @@ impl LocalizedTexts {
         }
 
         Self { texts }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic(expected = "Error: locale translation key should be a string")]
+    fn test_key_should_be_string() {
+        let yaml_str = r#"
+_version: 2
+1: 
+  en: "en"
+"#;
+        let yaml: Yaml = serde_yaml_ng::from_str(yaml_str).unwrap();
+        LocalizedTexts::new(yaml);
+    }
+
+    #[test]
+    #[should_panic(expected = "Error: locale file version should be 2")]
+    fn test_should_have_version_2() {
+        let yaml_str = r#"
+_version: 1
+"with_no_en":
+"with_en":
+  en: "with_en""#;
+        let yaml: Yaml = serde_yaml_ng::from_str(yaml_str).unwrap();
+        LocalizedTexts::new(yaml);
+    }
+
+    #[test]
+    #[should_panic(expected = "Error: local file version key `_version` not found")]
+    fn test_version_not_found() {
+        let yaml_str = r#"
+"with_no_en":
+"with_en":
+  en: "with_en""#;
+        let yaml: Yaml = serde_yaml_ng::from_str(yaml_str).unwrap();
+        LocalizedTexts::new(yaml);
+    }
+
+    #[test]
+    fn test_localized_texts() {
+        let yaml_str = r#"
+_version: 2
+"with_no_en":
+"with_en":
+  en: "with_en""#;
+        let yaml: Yaml = serde_yaml_ng::from_str(yaml_str).unwrap();
+        let parsed = LocalizedTexts::new(yaml);
+
+        let expected = LocalizedTexts {
+            texts: IndexMap::from_iter(vec![
+                ("with_no_en".to_string(), Translations { en: None }),
+                (
+                    "with_en".to_string(),
+                    Translations {
+                        en: Some("with_en".to_string()),
+                    },
+                ),
+            ]),
+        };
+
+        assert_eq!(parsed, expected);
     }
 }
