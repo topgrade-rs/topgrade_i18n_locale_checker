@@ -1,6 +1,7 @@
-use parser::{LocaleKeyParser, LocaleToken};
-
 use super::Rule;
+use crate::locale_file_parser::LocalizedTexts;
+use crate::locale_key_collector::LocaleKey;
+use parser::{LocaleKeyParser, LocaleToken};
 use std::collections::HashMap;
 
 /// A rules that enforces a locale's key matches its English translation.
@@ -12,8 +13,8 @@ pub(crate) struct KeyEngMatches;
 impl Rule for KeyEngMatches {
     fn check(
         &self,
-        localized_texts: &crate::locale_file_parser::LocalizedTexts,
-        _locale_keys: &[crate::locale_key_collector::LocaleKey],
+        localized_texts: &LocalizedTexts,
+        _locale_keys: &[LocaleKey],
         errors: &mut HashMap<String, Vec<(String, Option<String>)>>,
     ) {
         for (key, translations) in localized_texts.texts.iter() {
@@ -274,9 +275,10 @@ fn key_to_en(parser: &parser::LocaleKeyParser<'_>) -> String {
 
 #[cfg(test)]
 mod tests {
-    use parser::LocaleKeyParser;
-
     use super::*;
+    use crate::locale_file_parser::Translations;
+    use indexmap::IndexMap;
+    use parser::LocaleKeyParser;
 
     #[test]
     fn preprend_percent_works() {
@@ -292,5 +294,94 @@ mod tests {
         parser.parse("hello, topgrade");
 
         assert_eq!(key_to_en(&parser).as_str(), "hello, topgrade");
+    }
+
+    #[test]
+    fn test_rule_works_missing_en_translation() {
+        let localized_texts = LocalizedTexts {
+            texts: IndexMap::from([("Restarting".into(), Translations { en: None })]),
+        };
+        let rule = KeyEngMatches;
+        let mut errors = HashMap::new();
+        rule.check(&localized_texts, &[], &mut errors);
+        let expected_errors = HashMap::from([(
+            <KeyEngMatches as Rule>::name().to_string(),
+            vec![(
+                "Restarting".to_string(),
+                Some("Missing English translation".into()),
+            )],
+        )]);
+        assert_eq!(errors, expected_errors);
+    }
+
+    #[test]
+    fn test_rule_works_without_arguments() {
+        let localized_texts = LocalizedTexts {
+            texts: IndexMap::from([(
+                "Restarting".into(),
+                Translations {
+                    en: Some("buz".into()),
+                },
+            )]),
+        };
+        let rule = KeyEngMatches;
+        let mut errors = HashMap::new();
+        rule.check(&localized_texts, &[], &mut errors);
+        let expected_errors = HashMap::from([(
+            <KeyEngMatches as Rule>::name().to_string(),
+            vec![("Restarting".to_string(), None)],
+        )]);
+        assert_eq!(errors, expected_errors);
+    }
+
+    #[test]
+    fn test_rule_works_with_arguments() {
+        let localized_texts = LocalizedTexts {
+            texts: IndexMap::from([(
+                "Restarting {app}".into(),
+                Translations {
+                    en: Some("Restarting {app}".into()),
+                },
+            )]),
+        };
+        let rule = KeyEngMatches;
+        let mut errors = HashMap::new();
+        rule.check(&localized_texts, &[], &mut errors);
+        let expected_errors = HashMap::from([(
+            <KeyEngMatches as Rule>::name().to_string(),
+            vec![("Restarting {app}".to_string(), None)],
+        )]);
+        assert_eq!(errors, expected_errors);
+    }
+
+    #[test]
+    fn test_rule_works_with_valid_values() {
+        let localized_texts = LocalizedTexts {
+            texts: IndexMap::from([(
+                "Restarting {app}".into(),
+                Translations {
+                    en: Some("Restarting %{app}".into()),
+                },
+            )]),
+        };
+        let rule = KeyEngMatches;
+        let mut errors = HashMap::new();
+        rule.check(&localized_texts, &[], &mut errors);
+        let expected_errors = HashMap::new();
+        assert_eq!(errors, expected_errors);
+
+        let localized_texts = LocalizedTexts {
+            texts: IndexMap::from([(
+                "Restarting".into(),
+                Translations {
+                    en: Some("Restarting".into()),
+                },
+            )]),
+        };
+        let rule = KeyEngMatches;
+        let mut errors = HashMap::new();
+        rule.check(&localized_texts, &[], &mut errors);
+        let expected_errors = HashMap::new();
+        assert_eq!(errors, expected_errors);
     }
 }
