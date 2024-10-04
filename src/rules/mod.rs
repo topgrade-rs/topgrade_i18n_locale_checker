@@ -48,6 +48,6 @@ pub(crate) trait Rule {
         &self,
         localized_texts: &LocalizedTexts,
         locale_keys: &[crate::locale_key_collector::LocaleKey],
-        erros: &mut HashMap<String, Vec<(String, Option<String>)>>,
+        errors: &mut HashMap<String, Vec<(String, Option<String>)>>,
     );
 }

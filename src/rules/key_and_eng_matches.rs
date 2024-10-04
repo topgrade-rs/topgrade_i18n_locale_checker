@@ -14,7 +14,7 @@ impl Rule for KeyEngMatches {
         &self,
         localized_texts: &crate::locale_file_parser::LocalizedTexts,
         _locale_keys: &[crate::locale_key_collector::LocaleKey],
-        erros: &mut HashMap<String, Vec<(String, Option<String>)>>,
+        errors: &mut HashMap<String, Vec<(String, Option<String>)>>,
     ) {
         for (key, translations) in localized_texts.texts.iter() {
             let en = &translations.en;
@@ -23,7 +23,7 @@ impl Rule for KeyEngMatches {
                 Self::report_error(
                     key.clone(),
                     Some("Missing English translation".into()),
-                    erros,
+                    errors,
                 );
                 return;
             }
@@ -35,7 +35,7 @@ impl Rule for KeyEngMatches {
             let en = en.as_ref().unwrap();
 
             if en != &expected {
-                Self::report_error(key.clone(), None, erros)
+                Self::report_error(key.clone(), None, errors)
             }
         }
     }
