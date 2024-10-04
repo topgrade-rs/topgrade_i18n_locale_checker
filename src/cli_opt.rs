@@ -27,9 +27,10 @@ impl Cli {
 
     /// Flattens the input paths and returns it.
     ///
-    /// * For directories, it will walk through the directory and get all the Rust
-    ///   files.
-    /// * For symbolic links, it will convert it to the path it points to.
+    /// For directories, it will walk through the directory and get all the Rust
+    /// files.
+    ///
+    /// Symlink will be silently ignored.
     pub(crate) fn rust_src_to_check(&self) -> Vec<Cow<Path>> {
         let mut rust_files_to_check = Vec::with_capacity(self.rust_src_to_check.len());
 
@@ -71,17 +72,6 @@ impl Cli {
                         }
                     }
                 }
-            } else if entry_metadata.is_symlink() {
-                let file = std::fs::read_link(&entry_path).unwrap_or_else(|e| {
-                    panic!(
-                        "Error: cannot read the symlink of the specified file {} due to error {:?}",
-                        entry_path.display(),
-                        e
-                    )
-                });
-                if is_rust_file(&file) {
-                    rust_files_to_check.push(Cow::Owned(file));
-                }
             }
         }
 
@@ -89,6 +79,7 @@ impl Cli {
     }
 }
 
+/// Returns if the given path points to a Rust file by checking its file extension.
 fn is_rust_file<P: AsRef<Path> + ?Sized>(file_path: &P) -> bool {
     const RUST_FILE_EXTENSION: &str = "rs";
 
@@ -99,4 +90,46 @@ fn is_rust_file<P: AsRef<Path> + ?Sized>(file_path: &P) -> bool {
     }
 
     false
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::tempdir;
+
+    #[test]
+    fn test_cli_rust_src_to_check() {
+        let root_tempdir = tempdir().unwrap();
+        let root_tempdir_path = root_tempdir.path();
+
+        let file_foo = root_tempdir_path.join("foo");
+        std::fs::File::create_new(&file_foo).unwrap();
+        let file_bar_rs = root_tempdir_path.join("bar.rs");
+        std::fs::File::create_new(&file_bar_rs).unwrap();
+        let dir_baz = root_tempdir_path.join("baz");
+        std::fs::create_dir(&dir_baz).unwrap();
+        let file_qux_rs_under_dir_baz = dir_baz.join("qux.rs");
+        std::fs::File::create_new(&file_qux_rs_under_dir_baz).unwrap();
+
+        let cli = Cli {
+            // This field won't be used so let's give it a NULL value
+            locale_file: PathBuf::new(),
+            rust_src_to_check: vec![file_foo.clone(), file_bar_rs.clone(), dir_baz.clone()],
+        };
+
+        let flattened = cli.rust_src_to_check();
+        assert_eq!(
+            flattened,
+            [file_bar_rs.clone(), file_qux_rs_under_dir_baz.clone()]
+        );
+
+        let file_quux_rs_under_dir_baz = dir_baz.join("quux");
+        std::fs::File::create_new(&file_quux_rs_under_dir_baz).unwrap();
+
+        let flattened = cli.rust_src_to_check();
+        assert_eq!(
+            flattened,
+            [file_bar_rs.clone(), file_qux_rs_under_dir_baz.clone()]
+        );
+    }
 }

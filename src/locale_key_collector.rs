@@ -50,8 +50,6 @@ impl<'path> LocaleKeyCollector<'path> {
     }
 }
 
-// FileVisitor -> visit_file -> visit_macro -> (TranslationKey)
-
 /// Collector that is responsible for a single file.
 ///
 /// # NOTE
