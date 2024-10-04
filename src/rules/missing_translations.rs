@@ -1,4 +1,6 @@
 use super::Rule;
+use crate::locale_file_parser::LocalizedTexts;
+use crate::locale_key_collector::LocaleKey;
 use bitflags::bitflags;
 use std::collections::HashMap;
 
@@ -34,8 +36,8 @@ pub(crate) struct MissingTranslations;
 impl Rule for MissingTranslations {
     fn check(
         &self,
-        localized_texts: &crate::LocalizedTexts,
-        _locale_keys: &[crate::locale_key_collector::LocaleKey],
+        localized_texts: &LocalizedTexts,
+        _locale_keys: &[LocaleKey],
         errors: &mut HashMap<String, Vec<(String, Option<String>)>>,
     ) {
         for (key, translations) in localized_texts.texts.iter() {
@@ -49,5 +51,76 @@ impl Rule for MissingTranslations {
                 Self::report_error(key.clone(), Some(missing_langs.error_msg()), errors);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::locale_file_parser::Translations;
+    use indexmap::IndexMap;
+
+    #[test]
+    fn test_missing_en() {
+        let localized_texts = LocalizedTexts {
+            texts: IndexMap::from([
+                ("Restarting {app}".into(), Translations { en: None }),
+                ("Restarting {topgrade}".into(), Translations { en: None }),
+                (
+                    "Restarting {ba}".into(),
+                    Translations {
+                        en: Some("Restarting %{ba}".into()),
+                    },
+                ),
+            ]),
+        };
+        let mut errors = HashMap::new();
+        let rule = MissingTranslations;
+        rule.check(&localized_texts, &[], &mut errors);
+        let expected_errors = HashMap::from([(
+            <MissingTranslations as Rule>::name().to_string(),
+            vec![
+                (
+                    "Restarting {app}".to_string(),
+                    Some("Missing translations for [English]".into()),
+                ),
+                (
+                    "Restarting {topgrade}".to_string(),
+                    Some("Missing translations for [English]".into()),
+                ),
+            ],
+        )]);
+        assert_eq!(errors, expected_errors);
+    }
+
+    #[test]
+    fn test_no_missing_translations() {
+        let localized_texts = LocalizedTexts {
+            texts: IndexMap::from([
+                (
+                    "Restarting {app}".into(),
+                    Translations {
+                        en: Some("whatever".into()),
+                    },
+                ),
+                (
+                    "Restarting {topgrade}".into(),
+                    Translations {
+                        en: Some("wahtever".into()),
+                    },
+                ),
+                (
+                    "Restarting {ba}".into(),
+                    Translations {
+                        en: Some("Restarting %{ba}".into()),
+                    },
+                ),
+            ]),
+        };
+        let mut errors = HashMap::new();
+        let rule = MissingTranslations;
+        rule.check(&localized_texts, &[], &mut errors);
+        let expected_errors = HashMap::new();
+        assert_eq!(errors, expected_errors);
     }
 }
