@@ -36,7 +36,7 @@ impl Rule for MissingTranslations {
         &self,
         localized_texts: &crate::LocalizedTexts,
         _locale_keys: &[crate::locale_key_collector::LocaleKey],
-        erros: &mut HashMap<String, Vec<(String, Option<String>)>>,
+        errors: &mut HashMap<String, Vec<(String, Option<String>)>>,
     ) {
         for (key, translations) in localized_texts.texts.iter() {
             let mut missing_langs = MissingLanguages::empty();
@@ -46,7 +46,7 @@ impl Rule for MissingTranslations {
             }
 
             if !missing_langs.is_empty() {
-                Self::report_error(key.clone(), Some(missing_langs.error_msg()), erros);
+                Self::report_error(key.clone(), Some(missing_langs.error_msg()), errors);
             }
         }
     }
