@@ -71,6 +71,7 @@ mod tests {
                     en: Some("Restarting".into()),
                     es: Some("Restarting".into()),
                     zh_tw: Some("Restarting".into()),
+                    fr: Some("Restarting".into()),
                 },
             )]),
         };

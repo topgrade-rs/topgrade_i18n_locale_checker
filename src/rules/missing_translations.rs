@@ -13,6 +13,7 @@ bitflags! {
         const En   = 0b_0000_0001;
         const Es   = 0b_0000_0010;
         const ZhTW = 0b_0000_0100;
+        const Fr   = 0b_0000_1000;
     }
 }
 
@@ -30,6 +31,9 @@ impl MissingLanguages {
             }
             if lang == MissingLanguages::ZhTW {
                 str.push_str(", zh_TW");
+            }
+            if lang == MissingLanguages::Fr {
+                str.push_str(", fr");
             }
         }
         str.push(']');
@@ -60,6 +64,9 @@ impl Rule for MissingTranslations {
             if translations.zh_tw.is_none() {
                 missing_langs.insert(MissingLanguages::ZhTW);
             }
+            if translations.fr.is_none() {
+                missing_langs.insert(MissingLanguages::Fr);
+            }
 
             if !missing_langs.is_empty() {
                 Self::report_error(key.clone(), Some(missing_langs.error_msg()), errors);
@@ -84,6 +91,7 @@ mod tests {
                         en: None,
                         es: None,
                         zh_tw: Some("c".into()),
+                        fr: Some("c".into()),
                     },
                 ),
                 (
@@ -92,6 +100,7 @@ mod tests {
                         en: None,
                         es: Some("c".into()),
                         zh_tw: None,
+                        fr: None,
                     },
                 ),
                 (
@@ -100,6 +109,7 @@ mod tests {
                         en: Some("Restarting %{ba}".into()),
                         es: Some("Restarting %{ba}".into()),
                         zh_tw: Some("Restarting %{ba}".into()),
+                        fr: Some("Restarting %{ba}".into()),
                     },
                 ),
             ]),
@@ -116,7 +126,7 @@ mod tests {
                 ),
                 (
                     "Restarting {topgrade}".to_string(),
-                    Some("Missing translations for [en, zh_TW]".into()),
+                    Some("Missing translations for [en, zh_TW, fr]".into()),
                 ),
             ],
         )]);
@@ -133,6 +143,7 @@ mod tests {
                         en: Some("whatever".into()),
                         es: Some("whatever".into()),
                         zh_tw: Some("whatever".into()),
+                        fr: Some("whatever".into()),
                     },
                 ),
                 (
@@ -141,6 +152,7 @@ mod tests {
                         en: Some("wahtever".into()),
                         es: Some("wahtever".into()),
                         zh_tw: Some("wahtever".into()),
+                        fr: Some("whatever".into()),
                     },
                 ),
                 (
@@ -149,6 +161,7 @@ mod tests {
                         en: Some("Restarting %{ba}".into()),
                         es: Some("Restarting %{ba}".into()),
                         zh_tw: Some("Restarting %{ba}".into()),
+                        fr: Some("whatever".into()),
                     },
                 ),
             ]),
