@@ -16,6 +16,8 @@ pub(crate) struct Translations {
     pub(crate) es: Option<String>,
     /// Chinese - Taiwan
     pub(crate) zh_tw: Option<String>,
+    /// French
+    pub(crate) fr: Option<String>,
 }
 
 impl Translations {
@@ -25,6 +27,7 @@ impl Translations {
             en: None,
             es: None,
             zh_tw: None,
+            fr: None,
         }
     }
 
@@ -55,8 +58,15 @@ impl Translations {
                         _ => panic!("Error: translation should be string"),
                     })
                 };
+                let fr = {
+                    let opt_en_yaml = translation_mapping.remove("fr");
+                    opt_en_yaml.map(|opt_yaml| match opt_yaml {
+                        Yaml::String(str) => str,
+                        _ => panic!("Error: translation should be string"),
+                    })
+                };
 
-                Self { en, es, zh_tw }
+                Self { en, es, zh_tw, fr }
             }
 
             _ => panic!("Error: invalid format for translation"),
@@ -151,7 +161,8 @@ _version: 2
 "with_en":
   en: "with_en"
   es: "with_es"
-  zh_TW: "with_zh_TW""#;
+  zh_TW: "with_zh_TW"
+  fr: "with_fr""#;
         let yaml: Yaml = serde_yaml_ng::from_str(yaml_str).unwrap();
         let parsed = LocalizedTexts::new(yaml);
 
@@ -164,6 +175,7 @@ _version: 2
                         en: Some("with_en".to_string()),
                         es: Some("with_es".to_string()),
                         zh_tw: Some("with_zh_TW".to_string()),
+                        fr: Some("with_fr".to_string()),
                     },
                 ),
             ]),

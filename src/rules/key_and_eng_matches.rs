@@ -305,6 +305,7 @@ mod tests {
                     en: None,
                     es: Some("ff".into()),
                     zh_tw: Some("bar".into()),
+                    fr: Some("bar".into()),
                 },
             )]),
         };
@@ -330,6 +331,7 @@ mod tests {
                     en: Some("buz".into()),
                     es: Some("buz".into()),
                     zh_tw: Some("buz".into()),
+                    fr: Some("buz".into()),
                 },
             )]),
         };
@@ -352,6 +354,7 @@ mod tests {
                     en: Some("Restarting {app}".into()),
                     es: Some("Restarting {app}".into()),
                     zh_tw: Some("Restarting {app}".into()),
+                    fr: Some("Restarting {app}".into()),
                 },
             )]),
         };
@@ -374,6 +377,7 @@ mod tests {
                     en: Some("Restarting %{app}".into()),
                     es: Some("Restarting %{app}".into()),
                     zh_tw: Some("Restarting %{app}".into()),
+                    fr: Some("Restarting %{app}".into()),
                 },
             )]),
         };
@@ -390,6 +394,7 @@ mod tests {
                     en: Some("Restarting".into()),
                     es: Some("Restarting".into()),
                     zh_tw: Some("Restarting".into()),
+                    fr: Some("Restarting".into()),
                 },
             )]),
         };
