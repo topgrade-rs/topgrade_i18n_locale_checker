@@ -12,24 +12,51 @@ const LOCALE_FILE_VERSION: i64 = 2;
 pub(crate) struct Translations {
     /// English
     pub(crate) en: Option<String>,
+    /// Spanish
+    pub(crate) es: Option<String>,
+    /// Chinese - Taiwan
+    pub(crate) zh_tw: Option<String>,
 }
 
 impl Translations {
+    /// Construct a `Translations` with all fields set to `None`.
+    fn all_none() -> Self {
+        Self {
+            en: None,
+            es: None,
+            zh_tw: None,
+        }
+    }
+
     /// Construct a [`Translation`] from the given `translation_mapping`.
     fn new(translation_yaml: Yaml) -> Self {
         match translation_yaml {
-            Yaml::Null => Self { en: None },
+            Yaml::Null => Self::all_none(),
 
             Yaml::Mapping(mut translation_mapping) => {
                 let en = {
                     let opt_en_yaml = translation_mapping.remove("en");
                     opt_en_yaml.map(|opt_yaml| match opt_yaml {
-                        Yaml::String(en) => en,
+                        Yaml::String(str) => str,
+                        _ => panic!("Error: translation should be string"),
+                    })
+                };
+                let es = {
+                    let opt_en_yaml = translation_mapping.remove("es");
+                    opt_en_yaml.map(|opt_yaml| match opt_yaml {
+                        Yaml::String(str) => str,
+                        _ => panic!("Error: translation should be string"),
+                    })
+                };
+                let zh_tw = {
+                    let opt_en_yaml = translation_mapping.remove("zh_TW");
+                    opt_en_yaml.map(|opt_yaml| match opt_yaml {
+                        Yaml::String(str) => str,
                         _ => panic!("Error: translation should be string"),
                     })
                 };
 
-                Self { en }
+                Self { en, es, zh_tw }
             }
 
             _ => panic!("Error: invalid format for translation"),
@@ -122,17 +149,21 @@ _version: 1
 _version: 2
 "with_no_en":
 "with_en":
-  en: "with_en""#;
+  en: "with_en"
+  es: "with_es"
+  zh_TW: "with_zh_TW""#;
         let yaml: Yaml = serde_yaml_ng::from_str(yaml_str).unwrap();
         let parsed = LocalizedTexts::new(yaml);
 
         let expected = LocalizedTexts {
             texts: IndexMap::from_iter(vec![
-                ("with_no_en".to_string(), Translations { en: None }),
+                ("with_no_en".to_string(), Translations::all_none()),
                 (
                     "with_en".to_string(),
                     Translations {
                         en: Some("with_en".to_string()),
+                        es: Some("with_es".to_string()),
+                        zh_tw: Some("with_zh_TW".to_string()),
                     },
                 ),
             ]),

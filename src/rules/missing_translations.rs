@@ -10,7 +10,9 @@ bitflags! {
     /// When a language is missing, its bit will be set to 1.
     #[derive(Debug, PartialEq, Eq)]
     struct MissingLanguages: u8 {
-        const En = 0b_0000_0001;
+        const En   = 0b_0000_0001;
+        const Es   = 0b_0000_0010;
+        const ZhTW = 0b_0000_0100;
     }
 }
 
@@ -21,7 +23,13 @@ impl MissingLanguages {
         str.push('[');
         for lang in self.iter() {
             if lang == MissingLanguages::En {
-                str.push_str("English")
+                str.push_str("en")
+            }
+            if lang == MissingLanguages::Es {
+                str.push_str(", es");
+            }
+            if lang == MissingLanguages::ZhTW {
+                str.push_str(", zh_TW");
             }
         }
         str.push(']');
@@ -46,6 +54,12 @@ impl Rule for MissingTranslations {
             if translations.en.is_none() {
                 missing_langs.insert(MissingLanguages::En);
             }
+            if translations.es.is_none() {
+                missing_langs.insert(MissingLanguages::Es);
+            }
+            if translations.zh_tw.is_none() {
+                missing_langs.insert(MissingLanguages::ZhTW);
+            }
 
             if !missing_langs.is_empty() {
                 Self::report_error(key.clone(), Some(missing_langs.error_msg()), errors);
@@ -61,15 +75,31 @@ mod tests {
     use indexmap::IndexMap;
 
     #[test]
-    fn test_missing_en() {
+    fn test_missing_translations() {
         let localized_texts = LocalizedTexts {
             texts: IndexMap::from([
-                ("Restarting {app}".into(), Translations { en: None }),
-                ("Restarting {topgrade}".into(), Translations { en: None }),
+                (
+                    "Restarting {app}".into(),
+                    Translations {
+                        en: None,
+                        es: None,
+                        zh_tw: Some("c".into()),
+                    },
+                ),
+                (
+                    "Restarting {topgrade}".into(),
+                    Translations {
+                        en: None,
+                        es: Some("c".into()),
+                        zh_tw: None,
+                    },
+                ),
                 (
                     "Restarting {ba}".into(),
                     Translations {
                         en: Some("Restarting %{ba}".into()),
+                        es: Some("Restarting %{ba}".into()),
+                        zh_tw: Some("Restarting %{ba}".into()),
                     },
                 ),
             ]),
@@ -82,11 +112,11 @@ mod tests {
             vec![
                 (
                     "Restarting {app}".to_string(),
-                    Some("Missing translations for [English]".into()),
+                    Some("Missing translations for [en, es]".into()),
                 ),
                 (
                     "Restarting {topgrade}".to_string(),
-                    Some("Missing translations for [English]".into()),
+                    Some("Missing translations for [en, zh_TW]".into()),
                 ),
             ],
         )]);
@@ -101,18 +131,24 @@ mod tests {
                     "Restarting {app}".into(),
                     Translations {
                         en: Some("whatever".into()),
+                        es: Some("whatever".into()),
+                        zh_tw: Some("whatever".into()),
                     },
                 ),
                 (
                     "Restarting {topgrade}".into(),
                     Translations {
                         en: Some("wahtever".into()),
+                        es: Some("wahtever".into()),
+                        zh_tw: Some("wahtever".into()),
                     },
                 ),
                 (
                     "Restarting {ba}".into(),
                     Translations {
                         en: Some("Restarting %{ba}".into()),
+                        es: Some("Restarting %{ba}".into()),
+                        zh_tw: Some("Restarting %{ba}".into()),
                     },
                 ),
             ]),

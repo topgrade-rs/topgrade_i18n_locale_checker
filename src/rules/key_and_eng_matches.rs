@@ -299,7 +299,14 @@ mod tests {
     #[test]
     fn test_rule_works_missing_en_translation() {
         let localized_texts = LocalizedTexts {
-            texts: IndexMap::from([("Restarting".into(), Translations { en: None })]),
+            texts: IndexMap::from([(
+                "Restarting".into(),
+                Translations {
+                    en: None,
+                    es: Some("ff".into()),
+                    zh_tw: Some("bar".into()),
+                },
+            )]),
         };
         let rule = KeyEngMatches;
         let mut errors = HashMap::new();
@@ -321,6 +328,8 @@ mod tests {
                 "Restarting".into(),
                 Translations {
                     en: Some("buz".into()),
+                    es: Some("buz".into()),
+                    zh_tw: Some("buz".into()),
                 },
             )]),
         };
@@ -341,6 +350,8 @@ mod tests {
                 "Restarting {app}".into(),
                 Translations {
                     en: Some("Restarting {app}".into()),
+                    es: Some("Restarting {app}".into()),
+                    zh_tw: Some("Restarting {app}".into()),
                 },
             )]),
         };
@@ -361,6 +372,8 @@ mod tests {
                 "Restarting {app}".into(),
                 Translations {
                     en: Some("Restarting %{app}".into()),
+                    es: Some("Restarting %{app}".into()),
+                    zh_tw: Some("Restarting %{app}".into()),
                 },
             )]),
         };
@@ -375,6 +388,8 @@ mod tests {
                 "Restarting".into(),
                 Translations {
                     en: Some("Restarting".into()),
+                    es: Some("Restarting".into()),
+                    zh_tw: Some("Restarting".into()),
                 },
             )]),
         };

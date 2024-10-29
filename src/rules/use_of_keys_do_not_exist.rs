@@ -69,6 +69,8 @@ mod tests {
                 "Restarting".into(),
                 Translations {
                     en: Some("Restarting".into()),
+                    es: Some("Restarting".into()),
+                    zh_tw: Some("Restarting".into()),
                 },
             )]),
         };
