@@ -122,7 +122,7 @@ mod tests {
         );
 
         let file_quux_rs_under_dir_baz = dir_baz.join("quux");
-        std::fs::File::create(&file_quux_rs_under_dir_baz).unwrap();
+        std::fs::File::create(file_quux_rs_under_dir_baz).unwrap();
 
         let flattened = cli.rust_src_to_check();
         assert_eq!(
