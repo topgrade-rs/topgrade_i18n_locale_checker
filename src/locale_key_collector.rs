@@ -2,7 +2,8 @@
 //! of `rust_i18n::t!()` in Topgrade's source code and extracts the locale
 //! key.
 
-use proc_macro2::TokenTree;
+use litrs::StringLit;
+use proc_macro2::{Literal, TokenTree};
 use std::borrow::Cow;
 use std::path::Path;
 use syn::spanned::Spanned;
@@ -89,6 +90,11 @@ impl<'ast, 'path> Visit<'ast> for SingleFileLocalenKeyCollector<'path> {
     }
 }
 
+/// Parses a literal string, to remove quotes, and unescape \\n -> \n
+fn parse_literal(literal: Literal) -> String {
+    StringLit::try_from(literal).unwrap().value().to_string()
+}
+
 /// Info about a locale key.
 #[derive(Debug, PartialEq)]
 pub(crate) struct LocaleKey<'path> {
@@ -112,7 +118,7 @@ impl<'path> LocaleKey<'path> {
             .next()
             .expect("t!() needs at least 1 argument");
         let key = match translation_key {
-            TokenTree::Literal(literal) => literal.to_string().trim_matches('"').to_string(),
+            TokenTree::Literal(literal) => parse_literal(literal),
             _ => panic!("The first argument to t!() should be a string literal"),
         };
 
@@ -147,7 +153,7 @@ foo::bar::t!("not a key");
             file: &path,
             locale_keys: Vec::new(),
         };
-        collector.visit_file(&syn::parse_file(&file_contents).unwrap());
+        collector.visit_file(&syn::parse_file(file_contents).unwrap());
 
         assert_eq!(
             collector.locale_keys,
@@ -179,6 +185,14 @@ t!(key);
             file: &path,
             locale_keys: Vec::new(),
         };
-        collector.visit_file(&syn::parse_file(&file_contents).unwrap());
+        collector.visit_file(&syn::parse_file(file_contents).unwrap());
+    }
+
+    #[test]
+    fn test_parse_literal() {
+        let literal = Literal::string("foo");
+        assert_eq!(parse_literal(literal), "foo");
+        let literal = Literal::string("foo\nfoo");
+        assert_eq!(parse_literal(literal), "foo\nfoo");
     }
 }
