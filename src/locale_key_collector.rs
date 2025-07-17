@@ -2,10 +2,10 @@
 //! of `rust_i18n::t!()` in Topgrade's source code and extracts the locale
 //! key.
 
+use litrs::StringLit;
 use proc_macro2::{Literal, TokenTree};
 use std::borrow::Cow;
 use std::path::Path;
-use litrs::StringLit;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
